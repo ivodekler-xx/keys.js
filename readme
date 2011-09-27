@@ -1,0 +1,30 @@
+Readme  version 0.00~01
+jskeys version 0.1
+
+
+The goal of this simple script is to minimize keyboard hassle,
+it has a very easy implementation and hopefully not too many bugs.
+
+
+features to do:
+-setting a key directly through input
+compatibility checks and/or statements
+unexpected
+documentation
+
+
+startup: var myKL = new Keylistener();
+
+myKey = myKL.addKey({
+	keyCode/KeyName: 75/'k',
+	press: function,
+	whilepressed: { run: function,
+			delay: ms },
+	release: function
+	enabled: boolean
+	~dynamic property: pressed
+});
+
+Also, an array of listened pressed keys is available in myKL.pressedkeys!
+
+end of file, Ivo de Kler
