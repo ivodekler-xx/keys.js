@@ -82,10 +82,11 @@ var keyListener = function(name,settings){
 			if(keyCodes[value]) return this.keyCode = keyCodes[value];
 			return false;
 		});
-		this.__defineGetter__('descr',function(){return keyInfo.descr;});
-		this.__defineGetter__('press',function(){ return press; });
+		this.__defineGetter__('descr',  function(){return keyInfo.descr;});
+		this.__defineGetter__('press',  function(){ return press; });
 		this.__defineGetter__('release',function(){ return release; });
 		this.__defineGetter__('pressed',function(){ return pressed; });
+		this.__defineGetter__('remove', function(){ if(keyCode) if(usedKeys[keyCode]) delete usedKeys[keyCode]; });
 	      };
 	function enable(){ enabled = true; };
 	function disable(){ enabled = false; };

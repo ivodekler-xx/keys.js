@@ -7,28 +7,29 @@ it has a very easy implementation and hopefully not too many bugs.
 
 
 features to do:
--setting a key directly through input
 compatibility checks and/or statements
 unexpected
 documentation
 
 
-startup: var myKL = new Keylistener();
+startup: var myKL = new Keylistener({
+	'name', {enabled: true}
+});
 
 myKey = myKL.addKey({
-	keyCode/KeyName: 75/'k',
-	press: function,
-	whilepressed: { run: function,
-			delay: ms },
-	release: function
-	enabled: boolean
-	~dynamic property: pressed
+	[keyCode: 75/KeyName: 'k'],		//when no keyCode or keyName is supplied, key will be set to next key pressed.
+	[press: function],
+	[whilepressed: { run: function,
+			delay: ms }],
+	[release: function],
+	(once created: pressed: boolean)
 });
 
 Also, an array of listened pressed keys is available in myKL.pressedkeys!
 
 
 update: changing a key is now as simple as changing it's keyCode or keyName!
+
 
 
 end of file, Ivo de Kler
