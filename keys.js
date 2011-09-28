@@ -1,4 +1,4 @@
-var keyListeners = [] , listening = true, setKey, lastpressed;              //only features to do: change key, remove key
+var keyListeners = [] , listening = true, setKey, lastpressed, logging = true;              //only features to do: change key, remove key
 
 if (!window.console) window.console = {log:function(){}};
 
@@ -96,7 +96,6 @@ var keyListener = function(name,settings){
 	this.__defineGetter__('usedKeys',function(){return usedKeys;});
 	this.__defineGetter__('pressedKeys',function(){return pressedKeys;});
 	this.__defineGetter__('addKey',function(){return addKey;});
-	this.__defineGetter__('defineKey',function(){return defineKey;});
 	this.__defineGetter__('enabled',function(){return enabled});
 	this.__defineGetter__('enable',function(){return enable});
 	this.__defineGetter__('disable',function(){return disable});
@@ -109,7 +108,7 @@ document.onkeydown = function(event){
 	theKeyListener;
 	while(i--){
 		theKeyListener = keyListeners[i]
-		if(event.keyCode != lastpressed){
+		if(logging && event.keyCode != lastpressed){
 			console.log(event.keyCode+' - '+keyNames[event.keyCode]);
 			lastpressed = event.keyCode;
 		}
@@ -159,7 +158,7 @@ keyCodes['enter'] = 13;
 keyCodes['shift'] = 16;
 keyCodes['ctrl'] = 17;
 keyCodes['alt'] = 18;
-keyCodes['pausebrk'] = 19;
+keyCodes['pause'] = 19;
 keyCodes['capslock'] = 20;
 keyCodes['escape'] = 27;
 keyCodes['space'] = 32;
@@ -261,7 +260,7 @@ keyNames['13'] = 'enter';
 keyNames['16'] = 'shift';
 keyNames['17'] = 'ctrl';
 keyNames['18'] = 'alt';
-keyNames['19'] = 'pausebrk';
+keyNames['19'] = 'pause';
 keyNames['20'] = 'capslock';
 keyNames['27'] = 'escape';
 keyNames['32'] = 'space';
