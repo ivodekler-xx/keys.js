@@ -1,5 +1,5 @@
-Readme  version 0.00~01
-jskeys version 0.1
+Readme  version 0.001
+keys.js version 0.1
 
 
 The goal of this simple script is to minimize keyboard hassle,
@@ -13,14 +13,14 @@ documentation
 
 
 startup: var myKL = new Keylistener({
-	'name', {enabled: true}
+	'name', [enabled: true]
 });
 
 myKey = myKL.addKey({
-	[keyCode: 75/KeyName: 'k'],		//when no keyCode or keyName is supplied, key will be set to next key pressed.
+	[keyCode: 75/KeyName: 'k'], //when no keyCode or keyName is supplied, key will be set to the next key pressed.
 	[press: function],
 	[whilepressed: { run: function,
-			delay: ms }],
+			interval: ms }],
 	[release: function],
 	(once created: pressed: boolean)
 });

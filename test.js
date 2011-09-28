@@ -12,7 +12,7 @@ function keyDef(){
 		var rl = prompt('Message when releasing key');
 		return {keyCode: kC, 
 				press: function(){console.log(pr);}, 
-				whilePressed: {run: function(){console.log(wp);},delay: 150},
+				whilePressed: {run: function(){console.log(wp);},interval: 150},
 				release: function(){console.log(rl)}};
 	}
 	return false

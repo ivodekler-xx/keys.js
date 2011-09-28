@@ -57,7 +57,7 @@ var keyListener = function(name,settings){
 					      timeOut = setTimeout(function() {
 						      keyInfo.whilePressed.run();
 						      if (pressed){
-							      timeOut = setTimeout(arguments.callee, keyInfo.whilePressed.delay);
+							      timeOut = setTimeout(arguments.callee, keyInfo.whilePressed.interval);
 						      }
 					      }, keyInfo.whilePressed.delay);
 				      }
