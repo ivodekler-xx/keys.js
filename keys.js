@@ -1,14 +1,4 @@
-/*
-Scope-friendly versatile keyListeners 0.1
-First, to create a keyListener, just type new keyListener.
-Next step is to either add a fully defined key, or call defineKey.
-example:
-var myKeyListener = new keyListener;
-myKeyListener.addKey({
-	
-});
-*/ 
-var keyListeners = [], enabled = true, key2set = 0, lastpressed;              //only features to do: set key
+var keyListeners = [] , listening = true, setKey, lastpressed;              //only features to do: change key, remove key
 
 if (!window.console) window.console = {log:function(){}};
 
@@ -31,29 +21,20 @@ var keyListener = function(name,settings){
 	var index = keyListeners.length;
 	if(!settings) settings = {};
 	var enabled = settings.enabled || true;
-	keyListeners.push(this);
+	keyListeners.push(kL);
 	var usedKeys = [],
 		pressedKeys = [];
 	function addKey(keyInfo){
 		var newKey = new key(keyInfo);
-		usedKeys[newKey.keyCode] = newKey;
+		if(newKey.keyCode){
+			usedKeys[newKey.keyCode] = newKey;
+		} else {
+			listening = false;
+			setKey = function(keyCode){
+				newKey.keyCode = keyCode;
+			};
+		}
 		return newKey;
-	};
-	function defineKey(keyInfo){
-		enabled = false;
-		console.log(enabled);
-		setTimeout(function(){
-			console.log('state: '+key2set);
-			if(key2set == 0	){
-				setTimeout(arguments.callee, 100);
-			}else{
-				console.log(keyInfo.descr + 'set to '+keyNames.getKeyName(key2set));
-				keyInfo.keyCode = key2set;
-				key2set = 0;
-				//enabled = true;
-				console.log(addKey(keyinfo));
-			}
-		},100);
 	};
 	function removeListener(){
 		keyListeners.splice(index,1);
@@ -64,11 +45,12 @@ var keyListener = function(name,settings){
 		}
 	};
 	function key(keyInfo){
-		var pressed = false;
-		var timeOut;
+		var keyCode = keyInfo.keyCode ? keyInfo.keyCode : keyInfo.keyName ? keyCodes[keyInfo.keyName] : false;
+		var pressed = false,
+		    timeOut, k = this;
 		function press(){
 			      if(pressed == false){
-					kL.pressedKeys.push(keyInfo.keyCode);
+					kL.pressedKeys.push(keyCode);
 				      if(typeof keyInfo.press === 'function') keyInfo.press();
 				      pressed = true;
 				      if(keyInfo.whilePressed && typeof keyInfo.whilePressed.run === 'function') {
@@ -86,11 +68,24 @@ var keyListener = function(name,settings){
 			      if(timeOut) clearTimeout(timeOut);
 			      if(typeof keyInfo.release ==='function') keyInfo.release();
 		};
-		this.__defineGetter__('keyCode',function(){return keyInfo.keyCode;});
+		this.__defineGetter__('keyCode',function(){return keyCode;});
+		this.__defineSetter__('keyCode',function(value){
+			if(usedKeys[keyCode] && usedKeys[keyCode].keyCode != value){	//old value exists and has to be removed
+				delete usedKeys[keyCode];
+			}
+			keyCode = value;
+			usedKeys[keyCode] = k;
+			return keyCode;
+		});
 		this.__defineGetter__('keyName',function(){return keyNames[keyInfo.keyCode];});
+		this.__defineSetter__('keyName',function(value){
+			if(keyCodes[value]) return this.keyCode = keyCodes[value];
+			return false;
+		});
 		this.__defineGetter__('descr',function(){return keyInfo.descr;});
 		this.__defineGetter__('press',function(){ return press; });
 		this.__defineGetter__('release',function(){ return release; });
+		this.__defineGetter__('pressed',function(){ return pressed; });
 	      };
 	function enable(){ enabled = true; };
 	function disable(){ enabled = false; };
@@ -106,11 +101,9 @@ var keyListener = function(name,settings){
 	this.__defineGetter__('disable',function(){return disable});
 };
 
-
-
 document.onkeydown = function(event){
   var keyCode = event.keyCode;
-  if(enabled == true){
+  if(listening == true){
 	var i = keyListeners.length,
 	theKeyListener;
 	while(i--){
@@ -132,7 +125,7 @@ document.onkeydown = function(event){
 
 document.onkeyup = function(event){
   var keyCode = event.keyCode;
-  if(enabled == true){
+  if(listening == true){
 	var theKeyListener;
 	var i = keyListeners.length;
 	while(i--){
@@ -151,7 +144,11 @@ document.onkeyup = function(event){
 	      }
 	}
   }else{
-	key2set = keyCode;
+	if(typeof setKey == 'function'){
+		setKey(keyCode);
+		listening = true;
+		setKey = null;
+	}
   }
 };
 

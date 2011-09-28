@@ -27,4 +27,8 @@ myKey = myKL.addKey({
 
 Also, an array of listened pressed keys is available in myKL.pressedkeys!
 
+
+update: changing a key is now as simple as changing it's keyCode or keyName!
+
+
 end of file, Ivo de Kler

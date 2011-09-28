@@ -1,6 +1,6 @@
-var test = new keyListener;
+var myKL = new keyListener;
 
-console.log(test);
+console.log(myKL);
 
 function keyDef(){
 	var keyName = prompt('type the name of your key here');
@@ -18,10 +18,10 @@ function keyDef(){
 	return false
 };
 
-test.addKey({
+myKey = myKL.addKey({
 	keyCode: 13,
 	release: function(){
 		var nK = new keyDef();
-		if(nK) test.addKey(nK);
+		if(nK) myKL.addKey(nK);
 	}
 });
