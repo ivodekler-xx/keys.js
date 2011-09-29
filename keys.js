@@ -102,7 +102,7 @@ var keyListener = function(name,settings){
       this.__defineGetter__('change', function(){
          listening = false;
          setKey = function(kC){
-            if(kL.logging) console.log('changing key '+keyNames[keyCode]+ ' to '+keyNames[kC]);
+            if(kL.logging) console.log('changing '+keyNames[keyCode]+ ' key to '+keyNames[kC]);
             k.keyCode = kC;
          };
       });
@@ -186,7 +186,7 @@ document.onkeyup = function(event){
 	      }
 	}
   }else{
-	if(typeof setKey == 'function'){
+	if(setKey){
 		setKey(keyCode);
 		listening = true;
 		setKey = null;
