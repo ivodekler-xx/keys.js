@@ -1,4 +1,4 @@
-var keyListeners = [] , listening = true, setKey, lastpressed, logging = true;              //only features to do: change key, remove key
+var keyListeners = [] , listening = true, setKey, lastpressed;              //only features to do: change key, remove key
 
 if (!window.console) window.console = {log:function(){}};
 
@@ -20,7 +20,8 @@ var keyListener = function(name,settings){
 	this.name = name || 'a KeyListener';
 	var index = keyListeners.length;
 	if(!settings) settings = {};
-	var enabled = settings.enabled || true;
+	var enabled = settings.enabled || true,
+       logging = settings.logging || true;
 	keyListeners.push(kL);
 	var usedKeys = [],
 		pressedKeys = [];
@@ -45,31 +46,48 @@ var keyListener = function(name,settings){
 		}
 	};
 	function key(keyInfo){
-		var keyCode = keyInfo.keyCode ? keyInfo.keyCode : keyInfo.keyName ? keyCodes[keyInfo.keyName] : false;
-		var pressed = false,
-		    timeOut, k = this;
+      if (kL.logging) console.log(keyInfo,'created in '+ kL.name);
+		var k = this, descr = keyInfo.descr || null,
+          keyCode = keyInfo.keyCode ? keyInfo.keyCode : keyInfo.keyName ? keyCodes[keyInfo.keyName] : false,
+          pressed = false, timeOut, _whilePressed,
+          _press   = keyInfo.press  ? keyInfo.press : null,
+          _release = keyInfo.release ? keyInfo.release : null;
+      if(keyInfo.whilePressed){
+         if(typeof keyInfo.whilePressed == 'function'){
+            _whilePressed = {run: keyInfo.whilePressed, interval: 1000 };
+         }else if(typeof keyInfo.whilePressed == 'object' && keyInfo.whilePressed.run && keyInfo.whilePressed.interval ){
+            _whilePressed = {run: keyInfo.whilePressed.run, interval: keyInfo.whilePressed.interval };
+         }
+      }
 		function press(){
-			      if(pressed == false){
-					kL.pressedKeys.push(keyCode);
-				      if(typeof keyInfo.press === 'function') keyInfo.press();
-				      pressed = true;
-				      if(keyInfo.whilePressed && typeof keyInfo.whilePressed.run === 'function') {
-					      timeOut = setTimeout(function() {
-						      keyInfo.whilePressed.run();
-						      if (pressed){
-							      timeOut = setTimeout(arguments.callee, keyInfo.whilePressed.interval);
-						      }
-					      }, keyInfo.whilePressed.delay);
-				      }
-			      }
+         if(pressed == false){
+         kL.pressedKeys.push(keyCode);
+            if(_press) _press();
+            pressed = true;
+            if(_whilePressed) {
+               timeOut = setTimeout(function() {
+                  _whilePressed.run();
+                  if (pressed){
+                     timeOut = setTimeout(arguments.callee, _whilePressed.interval);
+                  }
+               }, _whilePressed.interval);
+            }
+         }
 		};
 		function release(){
-			      pressed = false;
-			      if(timeOut) clearTimeout(timeOut);
-			      if(typeof keyInfo.release ==='function') keyInfo.release();
+         pressed = false;
+         if(timeOut) clearTimeout(timeOut);
+         if(_release) _release();
 		};
 		this.__defineGetter__('keyCode',function(){return keyCode;});
-		this.__defineSetter__('keyCode',function(value){
+		this.__defineGetter__('keyName',function(){return keyNames[keyCode];});
+		this.__defineGetter__('descr',  function(){return descr;});
+		this.__defineGetter__('press',  function(){ return press; });
+		this.__defineGetter__('release',function(){ return release; });
+		this.__defineGetter__('pressed',function(){ return pressed; });
+      this.__defineGetter__('whilePressed', function(){ return {run: _whilePressed.run, interval: _whilePressed.interval}; });
+      
+      this.__defineSetter__('keyCode',function(value){
 			if(usedKeys[keyCode] && usedKeys[keyCode].keyCode != value){	//old value exists and has to be removed
 				delete usedKeys[keyCode];
 			}
@@ -77,17 +95,39 @@ var keyListener = function(name,settings){
 			usedKeys[keyCode] = k;
 			return keyCode;
 		});
-		this.__defineGetter__('keyName',function(){return keyNames[keyInfo.keyCode];});
-		this.__defineSetter__('keyName',function(value){
-			if(keyCodes[value]) return this.keyCode = keyCodes[value];
+      this.__defineSetter__('keyName',function(value){
+			if(keyCodes[value]) return keyCode = keyCodes[value];
 			return false;
 		});
-		this.__defineGetter__('descr',  function(){return keyInfo.descr;});
-		this.__defineGetter__('press',  function(){ return press; });
-		this.__defineGetter__('release',function(){ return release; });
-		this.__defineGetter__('pressed',function(){ return pressed; });
-		this.__defineGetter__('remove', function(){ if(keyCode) if(usedKeys[keyCode]) delete usedKeys[keyCode]; });
-	      };
+      this.__defineGetter__('change', function(){
+         listening = false;
+         setKey = function(kC){
+            if(kL.logging) console.log('changing key '+keyNames[keyCode]+ ' to '+keyNames[kC]);
+            k.keyCode = kC;
+         };
+      });
+      this.__defineGetter__('remove', function(){ if(keyCode) if(usedKeys[keyCode]) delete usedKeys[keyCode]; });
+      
+      this.__defineSetter__('press',  function(func) {
+         if(typeof func == 'function') _press = func;
+      });
+      this.__defineSetter__('release',function(func) {
+         if(typeof func == 'function') _release = func;
+      });
+      this.__defineSetter__('whilePressed', function(input){
+         if(typeof input == 'function') {
+            if(!_whilePressed){
+               _whilePressed = {interval: 1000};
+            }
+            _whilePressed.run = input;
+            
+         }
+         else if( typeof input == 'object' && input.run && input.interval)
+         {
+            _whilePressed = input;
+         }
+      });
+	};
 	function enable(){ enabled = true; };
 	function disable(){ enabled = false; };
 	function lowerIndex(){index--;};
@@ -99,6 +139,8 @@ var keyListener = function(name,settings){
 	this.__defineGetter__('enabled',function(){return enabled});
 	this.__defineGetter__('enable',function(){return enable});
 	this.__defineGetter__('disable',function(){return disable});
+   this.__defineGetter__('logging',function(){return logging});
+   this.__defineSetter__('logging',function( bool ){ if( typeof bool == 'boolean' ) logging = bool; });
 };
 
 document.onkeydown = function(event){
@@ -108,7 +150,7 @@ document.onkeydown = function(event){
 	theKeyListener;
 	while(i--){
 		theKeyListener = keyListeners[i]
-		if(logging && event.keyCode != lastpressed){
+		if(theKeyListener.logging && event.keyCode != lastpressed){
 			console.log(event.keyCode+' - '+keyNames[event.keyCode]);
 			lastpressed = event.keyCode;
 		}
